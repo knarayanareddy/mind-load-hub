@@ -39,7 +39,6 @@ function DashboardPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-  });
 
   const score = data.latestScore;
   const profile = data.profile;
