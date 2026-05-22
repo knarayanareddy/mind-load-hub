@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { CalendarDefragmenter } from "@/components/calendar-defragmenter";
 import { FrictionSandbox } from "@/components/friction-sandbox";
 import { ScoreRing } from "@/components/score-ring";
 import { ScoreTrend } from "@/components/score-trend";
