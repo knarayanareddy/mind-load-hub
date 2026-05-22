@@ -16,6 +16,10 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedInterventionsRouteImport } from './routes/_authenticated/interventions'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
+import { Route as ApiPublicIngestSlackRouteImport } from './routes/api/public/ingest.slack'
+import { Route as ApiPublicIngestJiraRouteImport } from './routes/api/public/ingest.jira'
+import { Route as ApiPublicIngestGithubRouteImport } from './routes/api/public/ingest.github'
+import { Route as ApiPublicIngestCalendarRouteImport } from './routes/api/public/ingest.calendar'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -52,6 +56,26 @@ const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
   path: '/alerts',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiPublicIngestSlackRoute = ApiPublicIngestSlackRouteImport.update({
+  id: '/api/public/ingest/slack',
+  path: '/api/public/ingest/slack',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestJiraRoute = ApiPublicIngestJiraRouteImport.update({
+  id: '/api/public/ingest/jira',
+  path: '/api/public/ingest/jira',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestGithubRoute = ApiPublicIngestGithubRouteImport.update({
+  id: '/api/public/ingest/github',
+  path: '/api/public/ingest/github',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicIngestCalendarRoute = ApiPublicIngestCalendarRouteImport.update({
+  id: '/api/public/ingest/calendar',
+  path: '/api/public/ingest/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -60,6 +84,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
+  '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,6 +96,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
+  '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,6 +110,10 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/interventions': typeof AuthenticatedInterventionsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
+  '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -88,8 +124,22 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interventions'
     | '/settings'
+    | '/api/public/ingest/calendar'
+    | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
+    | '/api/public/ingest/slack'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/alerts' | '/dashboard' | '/interventions' | '/settings'
+  to:
+    | '/'
+    | '/login'
+    | '/alerts'
+    | '/dashboard'
+    | '/interventions'
+    | '/settings'
+    | '/api/public/ingest/calendar'
+    | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
+    | '/api/public/ingest/slack'
   id:
     | '__root__'
     | '/'
@@ -99,12 +149,20 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/interventions'
     | '/_authenticated/settings'
+    | '/api/public/ingest/calendar'
+    | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
+    | '/api/public/ingest/slack'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiPublicIngestCalendarRoute: typeof ApiPublicIngestCalendarRoute
+  ApiPublicIngestGithubRoute: typeof ApiPublicIngestGithubRoute
+  ApiPublicIngestJiraRoute: typeof ApiPublicIngestJiraRoute
+  ApiPublicIngestSlackRoute: typeof ApiPublicIngestSlackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +216,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAlertsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/ingest/slack': {
+      id: '/api/public/ingest/slack'
+      path: '/api/public/ingest/slack'
+      fullPath: '/api/public/ingest/slack'
+      preLoaderRoute: typeof ApiPublicIngestSlackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/jira': {
+      id: '/api/public/ingest/jira'
+      path: '/api/public/ingest/jira'
+      fullPath: '/api/public/ingest/jira'
+      preLoaderRoute: typeof ApiPublicIngestJiraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/github': {
+      id: '/api/public/ingest/github'
+      path: '/api/public/ingest/github'
+      fullPath: '/api/public/ingest/github'
+      preLoaderRoute: typeof ApiPublicIngestGithubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/calendar': {
+      id: '/api/public/ingest/calendar'
+      path: '/api/public/ingest/calendar'
+      fullPath: '/api/public/ingest/calendar'
+      preLoaderRoute: typeof ApiPublicIngestCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +269,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiPublicIngestCalendarRoute: ApiPublicIngestCalendarRoute,
+  ApiPublicIngestGithubRoute: ApiPublicIngestGithubRoute,
+  ApiPublicIngestJiraRoute: ApiPublicIngestJiraRoute,
+  ApiPublicIngestSlackRoute: ApiPublicIngestSlackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
