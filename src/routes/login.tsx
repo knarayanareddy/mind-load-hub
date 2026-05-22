@@ -67,14 +67,17 @@ function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Activity className="h-5 w-5" />
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+              <Activity className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="font-display text-xl font-semibold">Cognitive Load Balancer</h1>
+              <p className="text-sm text-muted-foreground">Protect flow. Prevent burnout.</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-display text-xl font-semibold">Cognitive Load Balancer</h1>
-            <p className="text-sm text-muted-foreground">Protect flow. Prevent burnout.</p>
-          </div>
+          <ThemeToggle />
         </div>
 
         <Card className="p-6">
