@@ -1,7 +1,8 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import { Activity, Bell, Brain, LogOut, Settings, Sparkles } from "lucide-react";
+import { Activity, Bell, Brain, LogOut, Settings, Sparkles, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { RealtimeListener } from "@/components/realtime-listener";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: Brain },
   { to: "/interventions", label: "Interventions", icon: Sparkles },
+  { to: "/team", label: "Team", icon: Users },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
@@ -24,6 +26,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <RealtimeListener />
       <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-sidebar p-4 lg:flex">
         <div className="flex items-center gap-2 px-2 py-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
