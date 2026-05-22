@@ -1,0 +1,36 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node modules & Next.js build
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Databases
+*.db
+*.sqlite3
+
+# Local configuration / secrets
+.env
+.env.local
+.env.*.local
+
+# IDEs
+.vscode/
+.idea/
+.DS_Store
+
+# Cache
+.cache/

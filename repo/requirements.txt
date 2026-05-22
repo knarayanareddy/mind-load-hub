@@ -1,0 +1,14 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.36
+pydantic==2.9.2
+langgraph==0.2.45
+slack-sdk==3.33.0
+transformers==4.46.3
+torch==2.5.1
+google-api-python-client==2.149.0
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.1
+python-dotenv==1.0.1
+alembic==1.14.0
+pydantic-settings==2.6.1
