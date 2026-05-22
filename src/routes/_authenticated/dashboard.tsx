@@ -9,6 +9,7 @@ import { FrictionSandbox } from "@/components/friction-sandbox";
 import { ScoreRing } from "@/components/score-ring";
 import { ScoreTrend } from "@/components/score-trend";
 import { SignalGrid } from "@/components/signal-grid";
+import { SlackBotSimulator } from "@/components/slack-bot-simulator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -188,6 +189,8 @@ function DashboardPage() {
       </div>
 
       <CalendarDefragmenter />
+
+      <SlackBotSimulator />
 
         </>
       )}
