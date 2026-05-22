@@ -31,7 +31,7 @@ export const getDashboard = createServerFn({ method: "GET" })
 
     const [profileRes, latestScoreRes, scoreHistoryRes, latestSnapshotRes, interventionsRes, alertsRes] =
       await Promise.all([
-        supabase.from("profiles").select("*").maybeSingle(),
+        supabase.from("profiles").select("*").eq("user_id", context.userId).maybeSingle(),
         supabase
           .from("cl_scores")
           .select("*")
@@ -78,7 +78,11 @@ export const ingestSignal = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
 
-    const { data: profile } = await supabase.from("profiles").select("id").maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!profile) throw new Error("Profile not found");
 
     const { data: history } = await supabase
@@ -113,7 +117,11 @@ export const seedDemoData = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { supabase } = context;
 
-    const { data: profile } = await supabase.from("profiles").select("id").maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!profile) throw new Error("Profile not found");
 
     // Wipe any prior demo rows for a clean slate
