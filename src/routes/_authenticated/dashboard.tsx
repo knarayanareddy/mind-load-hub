@@ -186,6 +186,9 @@ function DashboardPage() {
           )}
         </Card>
       </div>
+
+      <CalendarDefragmenter />
+
         </>
       )}
     </div>
