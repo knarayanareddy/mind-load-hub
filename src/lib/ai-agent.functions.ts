@@ -34,7 +34,11 @@ export const generateRecommendations = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { data: profile } = await supabase.from("profiles").select("id, display_name, role").maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, display_name, role")
+      .eq("user_id", context.userId)
+      .maybeSingle();
     if (!profile) throw new Error("Profile not found");
 
     const [scoreRes, snapRes] = await Promise.all([
