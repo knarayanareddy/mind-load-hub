@@ -30,6 +30,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardPage() {
   const router = useRouter();
   const { data } = useSuspenseQuery(dashboardQuery);
+  const [sandboxMode, setSandboxMode] = useState(false);
   const seed = useMutation({
     mutationFn: () => seedDemoData(),
     onSuccess: () => {
@@ -37,6 +38,7 @@ function DashboardPage() {
       router.invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
+  });
   });
 
   const score = data.latestScore;
