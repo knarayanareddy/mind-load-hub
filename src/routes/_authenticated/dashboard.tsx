@@ -190,6 +190,8 @@ function DashboardPage() {
 
       <CalendarDefragmenter />
 
+      <SlackBotSimulator />
+
         </>
       )}
     </div>
