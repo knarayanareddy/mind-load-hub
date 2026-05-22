@@ -1,15 +1,19 @@
 import { queryOptions, useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { FrictionSandbox } from "@/components/friction-sandbox";
 import { ScoreRing } from "@/components/score-ring";
 import { ScoreTrend } from "@/components/score-trend";
 import { SignalGrid } from "@/components/signal-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { getDashboard, seedDemoData } from "@/lib/dashboard.functions";
 import type { AlertLevel } from "@/lib/scoring";
 
