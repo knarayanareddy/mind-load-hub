@@ -266,7 +266,7 @@ export function PrivacyCompliancePanel() {
                 <Switch checked={githubEnabled} onCheckedChange={setGithubEnabled} />
               </div>
             </div>
-          </<div>
+          </div>
 
           {/* Compliance Badges */}
           <div className="flex flex-wrap gap-2">
