@@ -74,10 +74,28 @@ function DashboardPage() {
             Last computed {new Date(score.computed_at).toLocaleString()}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
-          <RefreshCw className="mr-2 h-4 w-4" /> Re-seed demo data
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 shadow-sm">
+            <Label htmlFor="sandbox-mode" className="text-xs font-medium text-muted-foreground">
+              {sandboxMode ? "Sandbox Demo" : "Real Data"}
+            </Label>
+            <Switch
+              id="sandbox-mode"
+              checked={sandboxMode}
+              onCheckedChange={setSandboxMode}
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Re-seed demo data
+          </Button>
+        </div>
       </header>
+
+      {sandboxMode ? (
+        <FrictionSandbox />
+      ) : (
+        <>
+
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="flex flex-col items-center justify-center p-6 lg:col-span-1">
