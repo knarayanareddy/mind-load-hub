@@ -1,0 +1,78 @@
+import { createServerFn } from "@tanstack/react-start";
+
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+/** Returns direct reports with their latest cl score + unread alert count. */
+export const getTeam = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase } = context;
+
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("id, display_name, role")
+      .maybeSingle();
+    if (!me) throw new Error("Profile not found");
+
+    const { data: reports, error } = await supabase
+      .from("profiles")
+      .select("id, display_name, email, role, consent_level")
+      .eq("manager_id", me.id);
+    if (error) throw new Error(error.message);
+
+    const personIds = (reports ?? []).map((r) => r.id);
+    if (personIds.length === 0) {
+      return { manager: me, reports: [] as Array<{
+        id: string;
+        display_name: string | null;
+        email: string | null;
+        role: string | null;
+        consent_level: string;
+        score: number | null;
+        alert_level: string | null;
+        in_flow: boolean | null;
+        computed_at: string | null;
+        unread_alerts: number;
+      }> };
+    }
+
+    const [{ data: scores }, { data: alerts }] = await Promise.all([
+      supabase
+        .from("cl_scores")
+        .select("person_id, score, alert_level, in_flow_state, computed_at")
+        .in("person_id", personIds)
+        .order("computed_at", { ascending: false }),
+      supabase
+        .from("manager_alerts")
+        .select("id, person_id, is_read")
+        .eq("manager_id", me.id)
+        .eq("is_read", false),
+    ]);
+
+    const latestByPerson = new Map<string, NonNullable<typeof scores>[number]>();
+    for (const s of scores ?? []) {
+      if (!latestByPerson.has(s.person_id)) latestByPerson.set(s.person_id, s);
+    }
+    const unreadByPerson = new Map<string, number>();
+    for (const a of alerts ?? []) {
+      unreadByPerson.set(a.person_id, (unreadByPerson.get(a.person_id) ?? 0) + 1);
+    }
+
+    const enriched = (reports ?? []).map((r) => {
+      const s = latestByPerson.get(r.id);
+      return {
+        id: r.id,
+        display_name: r.display_name,
+        email: r.email,
+        role: r.role,
+        consent_level: r.consent_level,
+        score: s ? Number(s.score) : null,
+        alert_level: s?.alert_level ?? null,
+        in_flow: s?.in_flow_state ?? null,
+        computed_at: s?.computed_at ?? null,
+        unread_alerts: unreadByPerson.get(r.id) ?? 0,
+      };
+    });
+
+    return { manager: me, reports: enriched };
+  });
