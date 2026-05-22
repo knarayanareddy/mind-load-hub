@@ -12,6 +12,7 @@ export const getTeam = createServerFn({ method: "GET" })
     const { data: me } = await supabase
       .from("profiles")
       .select("id, display_name, role")
+      .eq("user_id", context.userId)
       .maybeSingle();
     if (!me) throw new Error("Profile not found");
 
@@ -89,6 +90,7 @@ export const getTeammateDetail = createServerFn({ method: "POST" })
     const { data: me } = await supabase
       .from("profiles")
       .select("id")
+      .eq("user_id", context.userId)
       .maybeSingle();
     if (!me) throw new Error("Profile not found");
 
