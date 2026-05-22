@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
@@ -75,4 +76,78 @@ export const getTeam = createServerFn({ method: "GET" })
     });
 
     return { manager: me, reports: enriched };
+  });
+
+/** Returns detailed metrics, score history, and active signals for a specific direct report. */
+export const getTeammateDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({ teammateId: z.string().uuid() }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { teammateId } = data;
+
+    const { data: me } = await supabase
+      .from("profiles")
+      .select("id")
+      .maybeSingle();
+    if (!me) throw new Error("Profile not found");
+
+    // Verify teammate reports to me
+    const { data: teammate, error: teammateErr } = await supabase
+      .from("profiles")
+      .select("id, display_name, email, role, consent_level")
+      .eq("id", teammateId)
+      .eq("manager_id", me.id)
+      .maybeSingle();
+
+    if (teammateErr || !teammate) {
+      throw new Error("Teammate not found or you are not authorized to view their profile");
+    }
+
+    // Fetch 14-day history of scores
+    const { data: scores, error: scoresErr } = await supabase
+      .from("cl_scores")
+      .select("score, computed_at, alert_level, risk_factors, recommended_interventions, in_flow_state, temporal_score, communication_score, task_switching_score, boundary_score, sentiment_score")
+      .eq("person_id", teammateId)
+      .order("computed_at", { ascending: false })
+      .limit(14);
+
+    if (scoresErr) throw new Error(scoresErr.message);
+
+    // Fetch latest signal snapshot - strictly if consent is FULL
+    let snapshot = null;
+    if (teammate.consent_level === "FULL") {
+      const { data: snap, error: snapErr } = await supabase
+        .from("signal_snapshots")
+        .select("*")
+        .eq("person_id", teammateId)
+        .order("captured_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!snapErr) snapshot = snap;
+    }
+
+    // Fetch active interventions
+    const { data: interventions } = await supabase
+      .from("interventions")
+      .select("*")
+      .eq("person_id", teammateId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    // Fetch unread manager alerts
+    const { data: alerts } = await supabase
+      .from("manager_alerts")
+      .select("*")
+      .eq("person_id", teammateId)
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    return {
+      teammate,
+      scores: (scores ?? []).slice().reverse(),
+      snapshot,
+      interventions: interventions ?? [],
+      alerts: alerts ?? [],
+    };
   });
