@@ -185,6 +185,8 @@ function DashboardPage() {
           )}
         </Card>
       </div>
+        </>
+      )}
     </div>
   );
 }
