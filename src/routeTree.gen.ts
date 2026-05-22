@@ -17,6 +17,7 @@ import { Route as AuthenticatedInterventionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as ApiPublicIngestSlackRouteImport } from './routes/api/public/ingest.slack'
+import { Route as ApiPublicIngestGithubRouteImport } from './routes/api/public/ingest.github'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -58,6 +59,11 @@ const ApiPublicIngestSlackRoute = ApiPublicIngestSlackRouteImport.update({
   path: '/api/public/ingest/slack',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIngestGithubRoute = ApiPublicIngestGithubRouteImport.update({
+  id: '/api/public/ingest/github',
+  path: '/api/public/ingest/github',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesByTo {
@@ -75,6 +82,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesById {
@@ -86,6 +94,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/interventions': typeof AuthenticatedInterventionsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRouteTypes {
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interventions'
     | '/settings'
+    | '/api/public/ingest/github'
     | '/api/public/ingest/slack'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interventions'
     | '/settings'
+    | '/api/public/ingest/github'
     | '/api/public/ingest/slack'
   id:
     | '__root__'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/interventions'
     | '/_authenticated/settings'
+    | '/api/public/ingest/github'
     | '/api/public/ingest/slack'
   fileRoutesById: FileRoutesById
 }
@@ -123,6 +135,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ApiPublicIngestGithubRoute: typeof ApiPublicIngestGithubRoute
   ApiPublicIngestSlackRoute: typeof ApiPublicIngestSlackRoute
 }
 
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestSlackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ingest/github': {
+      id: '/api/public/ingest/github'
+      path: '/api/public/ingest/github'
+      fullPath: '/api/public/ingest/github'
+      preLoaderRoute: typeof ApiPublicIngestGithubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -209,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ApiPublicIngestGithubRoute: ApiPublicIngestGithubRoute,
   ApiPublicIngestSlackRoute: ApiPublicIngestSlackRoute,
 }
 export const routeTree = rootRouteImport
