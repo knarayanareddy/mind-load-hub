@@ -3,6 +3,7 @@ import { Activity } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
