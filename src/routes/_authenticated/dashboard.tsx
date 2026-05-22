@@ -1,15 +1,19 @@
 import { queryOptions, useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { AlertTriangle, RefreshCw, Sparkles, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { FrictionSandbox } from "@/components/friction-sandbox";
 import { ScoreRing } from "@/components/score-ring";
 import { ScoreTrend } from "@/components/score-trend";
 import { SignalGrid } from "@/components/signal-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
 import { getDashboard, seedDemoData } from "@/lib/dashboard.functions";
 import type { AlertLevel } from "@/lib/scoring";
 
@@ -26,6 +30,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function DashboardPage() {
   const router = useRouter();
   const { data } = useSuspenseQuery(dashboardQuery);
+  const [sandboxMode, setSandboxMode] = useState(false);
   const seed = useMutation({
     mutationFn: () => seedDemoData(),
     onSuccess: () => {
@@ -69,10 +74,28 @@ function DashboardPage() {
             Last computed {new Date(score.computed_at).toLocaleString()}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
-          <RefreshCw className="mr-2 h-4 w-4" /> Re-seed demo data
-        </Button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-1.5 shadow-sm">
+            <Label htmlFor="sandbox-mode" className="text-xs font-medium text-muted-foreground">
+              {sandboxMode ? "Sandbox Demo" : "Real Data"}
+            </Label>
+            <Switch
+              id="sandbox-mode"
+              checked={sandboxMode}
+              onCheckedChange={setSandboxMode}
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={() => seed.mutate()} disabled={seed.isPending}>
+            <RefreshCw className="mr-2 h-4 w-4" /> Re-seed demo data
+          </Button>
+        </div>
       </header>
+
+      {sandboxMode ? (
+        <FrictionSandbox />
+      ) : (
+        <>
+
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="flex flex-col items-center justify-center p-6 lg:col-span-1">
@@ -162,6 +185,8 @@ function DashboardPage() {
           )}
         </Card>
       </div>
+        </>
+      )}
     </div>
   );
 }
