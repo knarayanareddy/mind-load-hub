@@ -1,5 +1,5 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
-import { Activity, Bell, Brain, LogOut, Settings, Sparkles, Users } from "lucide-react";
+import { Activity, Bell, Brain, LogOut, Settings, Sparkles, Users, Waves } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { RealtimeListener } from "@/components/realtime-listener";
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: Brain },
   { to: "/interventions", label: "Interventions", icon: Sparkles },
   { to: "/team", label: "Team", icon: Users },
+  { to: "/sprint-simulator", label: "Sprint Simulator", icon: Waves },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
