@@ -3,6 +3,7 @@ import { Activity, Bell, Brain, LogOut, Settings, Sparkles, Users, Waves } from 
 import type { ReactNode } from "react";
 
 import { RealtimeListener } from "@/components/realtime-listener";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
