@@ -17,6 +17,7 @@ import { Route as AuthenticatedInterventionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
 import { Route as ApiPublicIngestSlackRouteImport } from './routes/api/public/ingest.slack'
+import { Route as ApiPublicIngestJiraRouteImport } from './routes/api/public/ingest.jira'
 import { Route as ApiPublicIngestGithubRouteImport } from './routes/api/public/ingest.github'
 
 const LoginRoute = LoginRouteImport.update({
@@ -59,6 +60,11 @@ const ApiPublicIngestSlackRoute = ApiPublicIngestSlackRouteImport.update({
   path: '/api/public/ingest/slack',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIngestJiraRoute = ApiPublicIngestJiraRouteImport.update({
+  id: '/api/public/ingest/jira',
+  path: '/api/public/ingest/jira',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicIngestGithubRoute = ApiPublicIngestGithubRouteImport.update({
   id: '/api/public/ingest/github',
   path: '/api/public/ingest/github',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesByTo {
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRoutesById {
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/_authenticated/interventions': typeof AuthenticatedInterventionsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
+  '/api/public/ingest/jira': typeof ApiPublicIngestJiraRoute
   '/api/public/ingest/slack': typeof ApiPublicIngestSlackRoute
 }
 export interface FileRouteTypes {
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/interventions'
     | '/settings'
     | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
     | '/api/public/ingest/slack'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/interventions'
     | '/settings'
     | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
     | '/api/public/ingest/slack'
   id:
     | '__root__'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/interventions'
     | '/_authenticated/settings'
     | '/api/public/ingest/github'
+    | '/api/public/ingest/jira'
     | '/api/public/ingest/slack'
   fileRoutesById: FileRoutesById
 }
@@ -136,6 +148,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   ApiPublicIngestGithubRoute: typeof ApiPublicIngestGithubRoute
+  ApiPublicIngestJiraRoute: typeof ApiPublicIngestJiraRoute
   ApiPublicIngestSlackRoute: typeof ApiPublicIngestSlackRoute
 }
 
@@ -197,6 +210,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestSlackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ingest/jira': {
+      id: '/api/public/ingest/jira'
+      path: '/api/public/ingest/jira'
+      fullPath: '/api/public/ingest/jira'
+      preLoaderRoute: typeof ApiPublicIngestJiraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ingest/github': {
       id: '/api/public/ingest/github'
       path: '/api/public/ingest/github'
@@ -230,6 +250,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   ApiPublicIngestGithubRoute: ApiPublicIngestGithubRoute,
+  ApiPublicIngestJiraRoute: ApiPublicIngestJiraRoute,
   ApiPublicIngestSlackRoute: ApiPublicIngestSlackRoute,
 }
 export const routeTree = rootRouteImport
