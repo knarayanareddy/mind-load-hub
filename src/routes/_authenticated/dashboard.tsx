@@ -96,7 +96,8 @@ function DashboardPage() {
       {sandboxMode ? (
         <FrictionSandbox />
       ) : (
-        <>
+        <div className="space-y-6">
+
 
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -192,7 +193,7 @@ function DashboardPage() {
 
       <SlackBotSimulator />
 
-        </>
+        </div>
       )}
     </div>
   );
