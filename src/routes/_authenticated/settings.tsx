@@ -87,6 +87,8 @@ function SettingsPage() {
       <Button onClick={() => save.mutate()} disabled={save.isPending}>
         {save.isPending ? "Saving…" : "Save changes"}
       </Button>
+
+      <PrivacyCompliancePanel />
     </div>
   );
 }
