@@ -47,8 +47,14 @@ function LoginPage() {
 
   const google = async () => {
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) toast.error(String(r.error));
+    if (r.error) {
+      toast.error(String(r.error));
+      return;
+    }
+    if (r.redirected) return;
+    router.navigate({ to: "/dashboard" });
   };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
