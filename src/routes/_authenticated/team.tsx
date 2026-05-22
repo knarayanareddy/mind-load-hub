@@ -16,10 +16,10 @@ export const Route = createFileRoute("/_authenticated/team")({
 
 const LEVEL_CLASS: Record<AlertLevel, string> = {
   OPTIMAL: "bg-[color:var(--load-optimal)]/15 text-[color:var(--load-optimal)]",
-  LOW: "bg-[color:var(--load-low)]/15 text-[color:var(--load-low)]",
   MODERATE: "bg-[color:var(--load-moderate)]/15 text-[color:var(--load-moderate)]",
   HIGH: "bg-[color:var(--load-high)]/15 text-[color:var(--load-high)]",
   CRITICAL: "bg-destructive/15 text-destructive",
+  BURNOUT: "bg-destructive/20 text-destructive",
 };
 
 function TeamPage() {
