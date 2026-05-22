@@ -462,9 +462,14 @@ export const updateConsent = createServerFn({ method: "POST" })
     z
       .object({
         consent_level: z.enum(["MINIMAL", "BASIC", "FULL"]),
-        display_name: z.string().min(1).max(80).optional(),
-        role: z.string().min(1).max(80).optional(),
+        display_name: z.string().trim().max(80).optional(),
+        role: z.string().trim().max(80).optional(),
       })
+      .transform((value) => ({
+        consent_level: value.consent_level,
+        ...(value.display_name ? { display_name: value.display_name } : {}),
+        ...(value.role ? { role: value.role } : {}),
+      }))
       .parse(input),
   )
   .handler(async ({ data, context }) => {
