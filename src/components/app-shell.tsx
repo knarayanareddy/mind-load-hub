@@ -3,6 +3,7 @@ import { Activity, Bell, Brain, LogOut, Settings, Sparkles, Users, Waves } from 
 import type { ReactNode } from "react";
 
 import { RealtimeListener } from "@/components/realtime-listener";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -75,10 +76,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <span className="font-display text-sm font-semibold">CL Balancer</span>
           </div>
-          <div className="hidden lg:block text-sm text-muted-foreground">
-            Real-time cognitive load monitoring
+          <div className="hidden lg:flex items-center gap-3 text-sm text-muted-foreground">
+            <span>Real-time cognitive load monitoring</span>
+            <ThemeToggle />
           </div>
           <div className="flex items-center gap-2 lg:hidden">
+            <ThemeToggle />
             {NAV.map(({ to, icon: Icon }) => {
               const active = pathname === to || pathname.startsWith(to + "/");
               return (
