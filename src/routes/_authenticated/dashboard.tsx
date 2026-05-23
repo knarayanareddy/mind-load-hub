@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { CalendarDefragmenter } from "@/components/calendar-defragmenter";
+import { IntegrationsPanel } from "@/components/integrations-panel";
 import { FrictionSandbox } from "@/components/friction-sandbox";
 import { ScoreRing } from "@/components/score-ring";
 import { ScoreTrend } from "@/components/score-trend";
