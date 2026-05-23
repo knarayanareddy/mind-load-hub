@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ensureProfileForUser } from "@/lib/profile.server";
 
 /** Returns direct reports with their latest cl score + unread alert count. */
 export const getTeam = createServerFn({ method: "GET" })
@@ -9,12 +10,7 @@ export const getTeam = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase } = context;
 
-    const { data: me } = await supabase
-      .from("profiles")
-      .select("id, display_name, role")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!me) throw new Error("Profile not found");
+    const me = await ensureProfileForUser(context.userId);
 
     const { data: reports, error } = await supabase
       .from("profiles")
