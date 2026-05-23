@@ -192,6 +192,8 @@ function DashboardPage() {
 
       <CalendarDefragmenter />
 
+      <IntegrationsPanel />
+
       <SlackBotSimulator />
 
         </div>
