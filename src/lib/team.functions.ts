@@ -83,12 +83,7 @@ export const getTeammateDetail = createServerFn({ method: "POST" })
     const { supabase } = context;
     const { teammateId } = data;
 
-    const { data: me } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!me) throw new Error("Profile not found");
+    const me = await ensureProfileForUser(context.userId);
 
     // Verify teammate reports to me
     const { data: teammate, error: teammateErr } = await supabase
