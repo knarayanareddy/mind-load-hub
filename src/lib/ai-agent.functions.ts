@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { ensureProfileForUser } from "@/lib/profile.server";
 
 const RecSchema = z.object({
   intervention_type: z.enum([
@@ -34,12 +35,7 @@ export const generateRecommendations = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id, display_name, role")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!profile) throw new Error("Profile not found");
+    const profile = await ensureProfileForUser(context.userId);
 
     const [scoreRes, snapRes] = await Promise.all([
       supabase

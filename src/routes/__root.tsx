@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureProfile } from "@/lib/profile.functions";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -98,7 +99,21 @@ function AuthSync() {
   const router = useRouter();
   const qc = useQueryClient();
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+    // Make sure the signed-in user always has a profiles row before any
+    // dashboard / team query runs.
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) ensureProfile().catch(() => {});
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "TOKEN_REFRESHED")) {
+        ensureProfile()
+          .catch(() => {})
+          .finally(() => {
+            router.invalidate();
+            qc.invalidateQueries();
+          });
+        return;
+      }
       router.invalidate();
       qc.invalidateQueries();
     });

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { ensureProfileForUser } from "@/lib/profile.server";
 import { computeScore, type SignalInput } from "@/lib/scoring";
 
 const SignalSchema = z.object({
@@ -29,9 +30,12 @@ export const getDashboard = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase } = context;
 
+    // Guarantee a profile exists before any downstream query.
+    const profile = await ensureProfileForUser(context.userId);
+
     const [profileRes, latestScoreRes, scoreHistoryRes, latestSnapshotRes, interventionsRes, alertsRes] =
       await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", context.userId).maybeSingle(),
+        Promise.resolve({ data: profile }),
         supabase
           .from("cl_scores")
           .select("*")
@@ -78,12 +82,7 @@ export const ingestSignal = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase } = context;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!profile) throw new Error("Profile not found");
+    const profile = await ensureProfileForUser(context.userId);
 
     const { data: history } = await supabase
       .from("cl_scores")
@@ -117,12 +116,7 @@ export const seedDemoData = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { supabase } = context;
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .maybeSingle();
-    if (!profile) throw new Error("Profile not found");
+    const profile = await ensureProfileForUser(context.userId);
 
     // Wipe any prior demo rows for a clean slate
     await Promise.all([
