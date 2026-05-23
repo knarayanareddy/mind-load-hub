@@ -48,14 +48,17 @@ function DashboardPage() {
 
   if (!score) {
     return (
-      <div className="mx-auto max-w-2xl py-20 text-center">
-        <h1 className="font-display text-2xl font-semibold">Welcome{profile?.display_name ? `, ${profile.display_name}` : ""}</h1>
-        <p className="mt-2 text-muted-foreground">
-          No signals yet. Seed 14 days of demo telemetry to see the dashboard come to life.
-        </p>
-        <Button className="mt-6" onClick={() => seed.mutate()} disabled={seed.isPending}>
-          {seed.isPending ? "Seeding…" : "Seed demo data"}
-        </Button>
+      <div className="mx-auto max-w-4xl space-y-8 py-12">
+        <div className="text-center">
+          <h1 className="font-display text-2xl font-semibold">Welcome{profile?.display_name ? `, ${profile.display_name}` : ""}</h1>
+          <p className="mt-2 text-muted-foreground">
+            Connect a data source below, or seed 14 days of demo telemetry to preview the dashboard.
+          </p>
+          <Button className="mt-6" onClick={() => seed.mutate()} disabled={seed.isPending}>
+            {seed.isPending ? "Seeding…" : "Seed demo data"}
+          </Button>
+        </div>
+        <IntegrationsPanel />
       </div>
     );
   }
