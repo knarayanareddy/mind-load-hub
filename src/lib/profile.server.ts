@@ -42,13 +42,13 @@ export async function ensureProfileForUser(
     if (authUser?.user) {
       email = email ?? authUser.user.email ?? null;
       const m = (authUser.user.user_metadata ?? {}) as Record<string, unknown>;
-      displayName =
-        displayName ??
+      const fromMeta =
         (typeof m.display_name === "string" && m.display_name) ||
         (typeof m.full_name === "string" && m.full_name) ||
         (typeof m.name === "string" && m.name) ||
         (email ? email.split("@")[0] : null) ||
         "User";
+      displayName = displayName ?? fromMeta;
     }
   }
 
