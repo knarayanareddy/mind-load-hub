@@ -22,15 +22,23 @@ function SettingsPage() {
   const router = useRouter();
   const { data } = useSuspenseQuery(q);
   const p = data.profile;
-  const [name, setName] = useState(p?.display_name ?? "");
-  const [role, setRole] = useState(p?.role ?? "");
+  const defaultName =
+    p?.display_name?.trim() || p?.email?.split("@")[0] || "User";
+  const [name, setName] = useState(defaultName);
+  const [role, setRole] = useState(p?.role?.trim() ?? "");
   const [consent, setConsent] = useState<"MINIMAL" | "BASIC" | "FULL">(
     (p?.consent_level as "MINIMAL" | "BASIC" | "FULL") ?? "BASIC",
   );
 
   const save = useMutation({
     mutationFn: () =>
-      updateConsent({ data: { display_name: name, role, consent_level: consent } }),
+      updateConsent({
+        data: {
+          display_name: name.trim() || undefined,
+          role: role.trim() || undefined,
+          consent_level: consent,
+        },
+      }),
     onSuccess: () => {
       toast.success("Settings saved");
       router.invalidate();
