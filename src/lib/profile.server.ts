@@ -8,6 +8,7 @@ type ProfileRow = {
   role: string | null;
   manager_id: string | null;
   consent_level: string;
+  workspace_id: string | null;
 };
 
 /**

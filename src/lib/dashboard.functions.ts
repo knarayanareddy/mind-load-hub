@@ -44,7 +44,7 @@ export const getDashboard = createServerFn({ method: "GET" })
           .maybeSingle(),
         supabase
           .from("cl_scores")
-          .select("score, computed_at, alert_level")
+          .select("*")
           .order("computed_at", { ascending: false })
           .limit(30),
         supabase
@@ -92,7 +92,23 @@ export const ingestSignal = createServerFn({ method: "POST" })
     const historyArr = (history ?? []).map((h) => Number(h.score)).reverse();
 
     const signal: SignalInput = data;
-    const result = computeScore(signal, historyArr);
+
+    const { data: latestCheckIn } = await supabase
+      .from("interventions")
+      .select("intervention_params")
+      .eq("person_id", profile.id)
+      .eq("intervention_type", "MANAGER_CHECK_IN")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const feedbackStatus = (latestCheckIn?.intervention_params as any)?.feedback_status as
+      | "decreased"
+      | "unchanged"
+      | "escalating"
+      | undefined;
+
+    const result = computeScore(signal, historyArr, feedbackStatus);
 
     const { source, ...snapshotData } = data;
     const { error: snapErr } = await supabase
@@ -114,8 +130,11 @@ export const ingestSignal = createServerFn({ method: "POST" })
 export const seedDemoData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabase } = context;
+    if (process.env.NODE_ENV !== "development") {
+      throw new Error("Demo seeding is only available in development environment");
+    }
 
+    const { supabase } = context;
     const profile = await ensureProfileForUser(context.userId);
 
     // Wipe any prior demo rows for a clean slate

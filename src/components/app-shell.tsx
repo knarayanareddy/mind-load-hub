@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+
+
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: Brain },
   { to: "/interventions", label: "Interventions", icon: Sparkles },
   { to: "/team", label: "Team", icon: Users },
-  { to: "/sprint-simulator", label: "Sprint Simulator", icon: Waves },
   { to: "/alerts", label: "Alerts", icon: Bell },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;

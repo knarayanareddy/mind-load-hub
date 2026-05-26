@@ -144,3 +144,55 @@ export const getTeammateDetail = createServerFn({ method: "POST" })
       alerts: alerts ?? [],
     };
   });
+
+export const logManagerCheckIn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => z.object({
+    teammateId: z.string().uuid(),
+    feedbackStatus: z.enum(["decreased", "unchanged", "escalating"]),
+    notes: z.string().max(1000).optional(),
+  }).parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { teammateId, feedbackStatus, notes } = data;
+
+    const me = await ensureProfileForUser(userId);
+
+    const { data: teammate } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", teammateId)
+      .eq("manager_id", me.id)
+      .maybeSingle();
+
+    if (!teammate) {
+      throw new Error("Teammate not found or you are not authorized to log check-ins for them.");
+    }
+
+    const { data: latestScore } = await supabase
+      .from("cl_scores")
+      .select("score")
+      .eq("person_id", teammateId)
+      .order("computed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const clScoreBefore = latestScore ? Number(latestScore.score) : 0;
+
+    const { error: insErr } = await supabase
+      .from("interventions")
+      .insert({
+        person_id: teammateId,
+        triggered_by: "MANAGER",
+        intervention_type: "MANAGER_CHECK_IN",
+        intervention_params: { feedback_status: feedbackStatus, notes: notes || "" },
+        outcome: "SUCCESS",
+        outcome_details: `Manager logged load feedback: ${feedbackStatus}.`,
+        cl_score_before: clScoreBefore,
+        cl_score_after: feedbackStatus === "decreased" ? Math.round(clScoreBefore * 0.9) : clScoreBefore,
+      } as any);
+
+    if (insErr) throw new Error(`Failed to log check-in: ${insErr.message}`);
+
+    return { ok: true };
+  });

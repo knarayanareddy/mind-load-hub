@@ -18,13 +18,14 @@ export const Route = createFileRoute("/api/public/ingest/slack")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
-        const auth = verifyAuth(request);
+        const auth = await verifyAuth(request);
         if (!auth.ok) return auth.res;
         try {
           const body = Schema.parse(await request.json());
           const { user_email, ...partial } = body;
           const result = await ingestPartialSignal({
             email: user_email,
+            workspace_id: auth.workspace_id,
             source: "slack",
             partial,
           });

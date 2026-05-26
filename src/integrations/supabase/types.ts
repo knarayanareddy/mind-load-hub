@@ -180,6 +180,7 @@ export type Database = {
           role: string | null
           updated_at: string
           user_id: string
+          workspace_id: string | null
         }
         Insert: {
           consent_level?: string
@@ -192,6 +193,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id: string
+          workspace_id?: string | null
         }
         Update: {
           consent_level?: string
@@ -204,6 +206,7 @@ export type Database = {
           role?: string | null
           updated_at?: string
           user_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {
@@ -283,7 +286,42 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
-          },
+          }
+        ]
+      }
+      workspace_tokens: {
+        Row: {
+          id: string
+          workspace_id: string
+          hashed_token: string
+          created_by: string | null
+          expires_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workspace_id: string
+          hashed_token: string
+          created_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workspace_id?: string
+          hashed_token?: string
+          created_by?: string | null
+          expires_at?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_tokens_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
         ]
       }
     }

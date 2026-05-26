@@ -187,14 +187,18 @@ function recommendations(score: number, s: SignalInput): string[] {
   return out;
 }
 
-export function computeScore(signal: SignalInput, history: number[] = []): ScoreResult {
+export function computeScore(
+  signal: SignalInput,
+  history: number[] = [],
+  feedbackStatus?: "decreased" | "unchanged" | "escalating"
+): ScoreResult {
   const temporal = scoreTemporal(signal);
   const communication = scoreCommunication(signal);
   const task = scoreTasks(signal);
   const boundary = scoreBoundary(signal);
   const sentiment = scoreSentiment(signal);
 
-  const total = clamp(
+  let total = clamp(
     Math.round(
       (temporal * WEIGHTS.temporal +
         communication * WEIGHTS.communication +
@@ -205,10 +209,23 @@ export function computeScore(signal: SignalInput, history: number[] = []): Score
     ) / 10,
   );
 
+  if (feedbackStatus === "decreased") {
+    total = clamp(total * 0.9);
+  } else if (feedbackStatus === "escalating") {
+    total = clamp(total * 1.1);
+  }
+
+  let risk = burnoutRisk(total, history, signal);
+  if (feedbackStatus === "decreased") {
+    risk = clamp(risk * 0.8, 0, 100);
+  } else if (feedbackStatus === "escalating") {
+    risk = clamp(risk * 1.25, 0, 100);
+  }
+
   return {
     score: total,
     alert_level: levelFor(total),
-    burnout_risk_pct: burnoutRisk(total, history, signal),
+    burnout_risk_pct: risk,
     in_flow_state: detectFlow(signal, task),
     score_trend: trendFor(total, history),
     temporal_score: temporal,

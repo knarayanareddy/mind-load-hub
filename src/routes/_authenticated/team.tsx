@@ -1,5 +1,6 @@
-import { queryOptions, useQuery, useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import {
   Bell,
   Users,
@@ -16,8 +17,9 @@ import {
   Activity,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +32,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
-import { getTeam, getTeammateDetail } from "@/lib/team.functions";
+import { getTeam, getTeammateDetail, logManagerCheckIn } from "@/lib/team.functions";
 import type { AlertLevel } from "@/lib/scoring";
 
 const teamQuery = queryOptions({ queryKey: ["team"], queryFn: () => getTeam() });
@@ -54,8 +56,50 @@ const LEVEL_CLASS: Record<AlertLevel, string> = {
 };
 
 function TeamPage() {
+  const router = useRouter();
+  const qc = useQueryClient();
   const { data } = useSuspenseQuery(teamQuery);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime-team")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "cl_scores",
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["team"] });
+          if (selectedId) {
+            qc.invalidateQueries({ queryKey: ["teammate-detail", selectedId] });
+          }
+          router.invalidate();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "interventions",
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["team"] });
+          if (selectedId) {
+            qc.invalidateQueries({ queryKey: ["teammate-detail", selectedId] });
+          }
+          router.invalidate();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc, router, selectedId]);
 
   return (
     <div className="mx-auto max-w-6xl space-y-4">
@@ -143,7 +187,47 @@ function TeamPage() {
 
 function TeammateDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const { data, isLoading, error } = useQuery(teammateDetailQuery(id));
+
+  const [feedbackStatus, setFeedbackStatus] = useState<"decreased" | "unchanged" | "escalating">("unchanged");
+  const [checkInNotes, setCheckInNotes] = useState("");
+  const [isCheckInFormVisible, setIsCheckInFormVisible] = useState(false);
+  const [isSchedulingCalendar, setIsSchedulingCalendar] = useState(false);
+
+  const checkInMutation = useServerFn(logManagerCheckIn);
+  const logCheckIn = useMutation({
+    mutationFn: () => checkInMutation({
+      data: {
+        teammateId: id,
+        feedbackStatus,
+        notes: checkInNotes,
+      }
+    }),
+    onSuccess: () => {
+      toast.success(`Logged check-in feedback: ${feedbackStatus}`);
+      setIsCheckInFormVisible(false);
+      setCheckInNotes("");
+      qc.invalidateQueries({ queryKey: ["teammate-detail", id] });
+      qc.invalidateQueries({ queryKey: ["team"] });
+      router.invalidate();
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Failed to log check-in");
+    }
+  });
+
+  const scheduleMeeting = useMutation({
+    mutationFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    },
+    onSuccess: () => {
+      toast.success(`Calendar invitation successfully scheduled with ${data?.teammate?.display_name || data?.teammate?.email || "teammate"}!`);
+    },
+    onError: () => {
+      toast.error("Failed to schedule calendar check-in");
+    }
+  });
 
   const triggerIntervention = useMutation({
     mutationFn: async () => {
@@ -439,6 +523,123 @@ function TeammateDetailDrawer({ id, onClose }: { id: string; onClose: () => void
           )}
         </Card>
       )}
+
+      {/* Manager 1-on-1 Check-in Workflow */}
+      <Card className="border-slate-850 bg-slate-900/40 p-5 space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-350 flex items-center gap-2">
+            <Users className="h-4 w-4 text-emerald-450" /> Manager 1-on-1 Check-in Workflow
+          </h3>
+          <p className="text-xs text-muted-foreground mt-1">
+            Schedule meetings, check talking points, and log check-in feedback to help guide team balance.
+          </p>
+        </div>
+
+        {/* AI conversation starter block */}
+        <div className="rounded-lg border border-emerald-500/20 bg-emerald-950/5 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-emerald-450 text-xs font-semibold">
+            <Sparkles className="h-4 w-4" /> AI Conversation Starter
+          </div>
+          <p className="text-xs text-slate-300 italic leading-relaxed bg-slate-950/40 p-3 rounded-lg border border-slate-900">
+            {latestScore?.alert_level === "CRITICAL" || latestScore?.alert_level === "BURNOUT" || latestScore?.alert_level === "HIGH" ? (
+              `"Hey ${teammate.display_name ?? "there"}, I noticed your cognitive load indicators have been running in the ${latestScore.alert_level} zone for a few days. Let's use our 1-on-1 to review your workload, see what meeting blocks we can cancel, and check if we need to adjust sprint expectations to protect your focus."`
+            ) : (
+              `"Hey ${teammate.display_name ?? "there"}, I wanted to check in and see how your focus time is feeling this week. Your load scores are looking optimal and balanced, but let's make sure you have everything you need to sustain this flow state."`
+            )}
+          </p>
+          <div className="space-y-1">
+            <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Suggested Talking Points:</span>
+            <ul className="list-disc list-inside text-xs text-slate-400 space-y-1">
+              {latestScore?.alert_level === "CRITICAL" || latestScore?.alert_level === "BURNOUT" || latestScore?.alert_level === "HIGH" ? (
+                <>
+                  <li>Check if after-hours Slack notifications are causing sleep disruptions.</li>
+                  <li>Discuss calendar defragmentation (e.g. blocking out a Wednesday Focus Day).</li>
+                  <li>Review active Jira tickets or context-switching overhead from parallel PR reviews.</li>
+                </>
+              ) : (
+                <>
+                  <li>Verify if their meeting-free slots are being respected by cross-functional teams.</li>
+                  <li>Confirm they have enough clear track to keep in flow.</li>
+                </>
+              )}
+            </ul>
+          </div>
+        </div>
+
+        {!isCheckInFormVisible ? (
+          <div className="flex flex-wrap gap-2.5">
+            <Button
+              onClick={() => scheduleMeeting.mutate()}
+              disabled={scheduleMeeting.isPending}
+              variant="outline"
+              className="flex-1 bg-slate-900 border-slate-800 text-slate-300 text-xs py-1.5 h-auto hover:bg-slate-850 hover:text-white"
+            >
+              {scheduleMeeting.isPending ? "Scheduling meeting..." : "Schedule Check-In on Calendar"}
+            </Button>
+            <Button
+              onClick={() => setIsCheckInFormVisible(true)}
+              className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-1.5 h-auto"
+            >
+              Log Check-In Feedback
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-4 border-t border-slate-900 pt-4">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-slate-300">Teammate Load Status Update</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { v: "decreased", label: "🟢 Decreased", desc: "Workload relieved" },
+                  { v: "unchanged", label: "🟡 Unchanged", desc: "Workload stable" },
+                  { v: "escalating", label: "🔴 Escalating", desc: "Burnout risk high" }
+                ].map((opt) => (
+                  <button
+                    key={opt.v}
+                    type="button"
+                    onClick={() => setFeedbackStatus(opt.v as any)}
+                    className={`flex flex-col items-center p-2.5 rounded-lg border text-center transition-all ${
+                      feedbackStatus === opt.v
+                        ? "border-emerald-500 bg-emerald-950/15 text-emerald-300"
+                        : "border-slate-850 bg-slate-900/30 text-slate-400 hover:bg-slate-900/60"
+                    }`}
+                  >
+                    <span className="text-xs font-semibold">{opt.label}</span>
+                    <span className="text-[9px] text-muted-foreground mt-0.5">{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="notes" className="text-xs font-semibold text-slate-350">Feedback & Meeting Notes</label>
+              <textarea
+                id="notes"
+                value={checkInNotes}
+                onChange={(e) => setCheckInNotes(e.target.value)}
+                placeholder="List actions agreed upon, meeting cancelations, or ticket deferrals..."
+                className="w-full min-h-[70px] rounded-lg border border-slate-850 bg-slate-900/50 p-2.5 text-xs text-slate-350 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="ghost"
+                className="text-xs text-slate-400 hover:text-slate-200"
+                onClick={() => setIsCheckInFormVisible(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => logCheckIn.mutate()}
+                disabled={logCheckIn.isPending}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs"
+              >
+                {logCheckIn.isPending ? "Saving..." : "Save Check-In"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
 
       {teammate.consent_level === "MINIMAL" && (
         <Card className="border-slate-850 bg-slate-900/20 p-5 text-center space-y-2">

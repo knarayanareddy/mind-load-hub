@@ -13,7 +13,6 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTeamRouteImport } from './routes/_authenticated/team'
-import { Route as AuthenticatedSprintSimulatorRouteImport } from './routes/_authenticated/sprint-simulator'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedInterventionsRouteImport } from './routes/_authenticated/interventions'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -42,12 +41,6 @@ const AuthenticatedTeamRoute = AuthenticatedTeamRouteImport.update({
   path: '/team',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedSprintSimulatorRoute =
-  AuthenticatedSprintSimulatorRouteImport.update({
-    id: '/sprint-simulator',
-    path: '/sprint-simulator',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -97,7 +90,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/sprint-simulator': typeof AuthenticatedSprintSimulatorRoute
   '/team': typeof AuthenticatedTeamRoute
   '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
@@ -111,7 +103,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/interventions': typeof AuthenticatedInterventionsRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/sprint-simulator': typeof AuthenticatedSprintSimulatorRoute
   '/team': typeof AuthenticatedTeamRoute
   '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
@@ -127,7 +118,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/interventions': typeof AuthenticatedInterventionsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/sprint-simulator': typeof AuthenticatedSprintSimulatorRoute
   '/_authenticated/team': typeof AuthenticatedTeamRoute
   '/api/public/ingest/calendar': typeof ApiPublicIngestCalendarRoute
   '/api/public/ingest/github': typeof ApiPublicIngestGithubRoute
@@ -143,7 +133,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interventions'
     | '/settings'
-    | '/sprint-simulator'
     | '/team'
     | '/api/public/ingest/calendar'
     | '/api/public/ingest/github'
@@ -157,7 +146,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/interventions'
     | '/settings'
-    | '/sprint-simulator'
     | '/team'
     | '/api/public/ingest/calendar'
     | '/api/public/ingest/github'
@@ -172,7 +160,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/interventions'
     | '/_authenticated/settings'
-    | '/_authenticated/sprint-simulator'
     | '/_authenticated/team'
     | '/api/public/ingest/calendar'
     | '/api/public/ingest/github'
@@ -218,13 +205,6 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof AuthenticatedTeamRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/sprint-simulator': {
-      id: '/_authenticated/sprint-simulator'
-      path: '/sprint-simulator'
-      fullPath: '/sprint-simulator'
-      preLoaderRoute: typeof AuthenticatedSprintSimulatorRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/settings': {
@@ -291,7 +271,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedInterventionsRoute: typeof AuthenticatedInterventionsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSprintSimulatorRoute: typeof AuthenticatedSprintSimulatorRoute
   AuthenticatedTeamRoute: typeof AuthenticatedTeamRoute
 }
 
@@ -300,7 +279,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedInterventionsRoute: AuthenticatedInterventionsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSprintSimulatorRoute: AuthenticatedSprintSimulatorRoute,
   AuthenticatedTeamRoute: AuthenticatedTeamRoute,
 }
 
@@ -320,3 +298,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
